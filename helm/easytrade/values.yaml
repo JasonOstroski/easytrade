@@ -12,10 +12,6 @@ global:
 
 accountservice:
   enabled: true
-  # Example of overriding the image repository for a specific service
-  # image:
-  #   repository: europe-docker.pkg.dev/dynatrace-demoability/docker/easytrade/accountservice
-  #   tag: latest
   env:
     MANAGER_HOSTANDPORT: "{{ .Release.Name }}-manager:8080"
     PROXY_PREFIX: "accountservice"
@@ -24,8 +20,13 @@ accountservice:
       cpu: 30m
       memory: 600Mi
     limits:
-      cpu: 200m
+      cpu: 500m
       memory: 600Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
   service:
     enabled: true
     port: 8080
@@ -63,8 +64,13 @@ broker-service:
       cpu: 150m
       memory: 350Mi
     limits:
-      cpu: 600m
-      memory: 350Mi
+      cpu: "1"
+      memory: 512Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 15
+    targetCPUUtilizationPercentage: 60
   service:
     enabled: true
     port: 8080
@@ -116,11 +122,16 @@ credit-card-order-service:
       key: "JAVA_CONNECTION_STRING"
   resources:
     requests:
-      cpu: 20m
+      cpu: 50m
       memory: 650Mi
     limits:
-      cpu: 500m
+      cpu: "1"
       memory: 650Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
   service:
     enabled: true
     port: 8080
@@ -134,11 +145,11 @@ db:
       key: "SA_PASSWORD"
   resources:
     requests:
-      cpu: 500m
-      memory: 1.5Gi
+      cpu: "1"
+      memory: 3Gi
     limits:
-      cpu: "2"
-      memory: 1.5Gi
+      cpu: "4"
+      memory: 4Gi
   service:
     enabled: true
     port: 1433
@@ -209,13 +220,19 @@ frontendreverseproxy:
     OFFER_SERVICE_URL: "http://{{ .Release.Name }}-offerservice:8080"
     PRICING_SERVICE_URL: "http://{{ .Release.Name }}-pricing-service:8080"
     THIRD_PARTY_SERVICE_URL: "http://{{ .Release.Name }}-third-party-service:8080"
+    BITCOIN_SERVICE_URL: "http://{{ .Release.Name }}-bitcoin-service:8080"
   resources:
     requests:
       cpu: 50m
       memory: 100Mi
     limits:
-      cpu: 200m
-      memory: 100Mi
+      cpu: 500m
+      memory: 200Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
   service:
     enabled: true
     ports:
@@ -247,11 +264,16 @@ loginservice:
       key: "DOTNET_CONNECTION_STRING"
   resources:
     requests:
-      cpu: 20m
+      cpu: 50m
       memory: 450Mi
     limits:
-      cpu: 1
+      cpu: "1"
       memory: 450Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
   service:
     enabled: true
     port: 8080
@@ -313,11 +335,16 @@ pricing-service:
       key: "GO_CONNECTION_STRING"
   resources:
     requests:
-      cpu: 20m
-      memory: 80Mi
+      cpu: 50m
+      memory: 128Mi
     limits:
-      cpu: 200m
-      memory: 80Mi
+      cpu: 500m
+      memory: 256Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
   service:
     enabled: true
     port: 8080
@@ -394,6 +421,34 @@ third-party-service:
     limits:
       cpu: 200m
       memory: 450Mi
+  service:
+    enabled: true
+    port: 8080
+
+bitcoin-service:
+  enabled: true
+  env:
+    PROXY_PREFIX: "bitcoin-service"
+    CONFIRMATION_DELAY: "120"
+    CONFIRMATION_RATE: "300"
+    DETECTION_DELAY: "60"
+    DETECTION_RATE: "180"
+  envFromSecret:
+    MSSQL_CONNECTIONSTRING:
+      name: "{{ .Release.Name }}-connection-strings"
+      key: "JAVA_CONNECTION_STRING"
+  resources:
+    requests:
+      cpu: 50m
+      memory: 650Mi
+    limits:
+      cpu: "1"
+      memory: 650Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 20
+    targetCPUUtilizationPercentage: 60
   service:
     enabled: true
     port: 8080

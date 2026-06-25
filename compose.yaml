@@ -121,8 +121,11 @@ services:
       - engine
       - credit-card-order-service
       - third-party-service
+      - bitcoin-service
     ports:
       - 80:80
+    environment:
+      BITCOIN_SERVICE_URL: http://bitcoin-service:8080
 
   loadgen:
     <<: *default-service
@@ -195,6 +198,19 @@ services:
       COURIER_RATE: 900
       MANUFACTURE_DELAY: 500
       MANUFACTURE_RATE: 900
+
+  bitcoin-service:
+    <<: *default-service
+    image: ${REGISTRY}/bitcoin-service:${TAG}
+    depends_on:
+      - db
+    environment:
+      PROXY_PREFIX: bitcoin-service
+      MSSQL_CONNECTIONSTRING: *java-connection-string
+      CONFIRMATION_DELAY: "120"
+      CONFIRMATION_RATE: "300"
+      DETECTION_DELAY: "60"
+      DETECTION_RATE: "180"
 
   aggregator-service:
     <<: *default-service
