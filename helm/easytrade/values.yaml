@@ -12,20 +12,21 @@ global:
 
 accountservice:
   enabled: true
-  # Example of overriding the image repository for a specific service
-  # image:
-  #   repository: europe-docker.pkg.dev/dynatrace-demoability/docker/easytrade/accountservice
-  #   tag: latest
   env:
     MANAGER_HOSTANDPORT: "{{ .Release.Name }}-manager:8080"
     PROXY_PREFIX: "accountservice"
   resources:
     requests:
-      cpu: 30m
+      cpu: 50m
       memory: 600Mi
     limits:
-      cpu: 200m
-      memory: 600Mi
+      cpu: "1"
+      memory: 768Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 30
+    targetCPUUtilizationPercentage: 65
   service:
     enabled: true
     port: 8080
@@ -60,11 +61,16 @@ broker-service:
       key: "DOTNET_CONNECTION_STRING"
   resources:
     requests:
-      cpu: 150m
-      memory: 350Mi
+      cpu: 250m
+      memory: 512Mi
     limits:
-      cpu: 600m
-      memory: 350Mi
+      cpu: "2"
+      memory: 1Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 50
+    targetCPUUtilizationPercentage: 60
   service:
     enabled: true
     port: 8080
@@ -79,11 +85,16 @@ calculationservice:
     RABBITMQ_QUEUE: Trade_Data_Raw
   resources:
     requests:
-      cpu: 10m
-      memory: 25Mi
+      cpu: 50m
+      memory: 64Mi
     limits:
-      cpu: 100m
-      memory: 25Mi
+      cpu: 500m
+      memory: 128Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 20
+    targetCPUUtilizationPercentage: 70
 
 contentcreator:
   enabled: true
@@ -116,11 +127,16 @@ credit-card-order-service:
       key: "JAVA_CONNECTION_STRING"
   resources:
     requests:
-      cpu: 20m
+      cpu: 100m
       memory: 650Mi
     limits:
-      cpu: 500m
-      memory: 650Mi
+      cpu: "2"
+      memory: 1Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 30
+    targetCPUUtilizationPercentage: 65
   service:
     enabled: true
     port: 8080
@@ -134,19 +150,18 @@ db:
       key: "SA_PASSWORD"
   resources:
     requests:
-      cpu: 500m
-      memory: 1.5Gi
-    limits:
       cpu: "2"
-      memory: 1.5Gi
+      memory: 8Gi
+    limits:
+      cpu: "8"
+      memory: 16Gi
   service:
     enabled: true
     port: 1433
-  # Enabling persistence will create a PersistentVolumeClaim for the database data
-  # persistence:
-  #   enabled: true
-  #   mountPath: /var/opt/mssql
-  #   size: 10Gi
+  persistence:
+    enabled: true
+    mountPath: /var/opt/mssql
+    size: 50Gi
 
 engine:
   enabled: true
@@ -155,11 +170,16 @@ engine:
     PROXY_PREFIX: "engine"
   resources:
     requests:
-      cpu: 10m
+      cpu: 50m
       memory: 450Mi
     limits:
-      cpu: 200m
-      memory: 450Mi
+      cpu: 500m
+      memory: 512Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 20
+    targetCPUUtilizationPercentage: 70
   service:
     enabled: true
     port: 8080
@@ -200,6 +220,7 @@ frontendreverseproxy:
     FRONTEND_REVERSE_PROXY_PORT: "8080"
     ACCOUNT_SERVICE_URL: "http://{{ .Release.Name }}-accountservice:8080"
     BROKER_SERVICE_URL: "http://{{ .Release.Name }}-broker-service:8080"
+    BROKER_SERVICE_URL_HOST: "{{ .Release.Name }}-broker-service:8080"
     CREDIT_CARD_ORDER_SERVICE_URL: "http://{{ .Release.Name }}-credit-card-order-service:8080"
     ENGINE_URL: "http://{{ .Release.Name }}-engine:8080"
     FEATURE_FLAG_SERVICE_URL: "http://{{ .Release.Name }}-feature-flag-service:8080"
@@ -209,13 +230,20 @@ frontendreverseproxy:
     OFFER_SERVICE_URL: "http://{{ .Release.Name }}-offerservice:8080"
     PRICING_SERVICE_URL: "http://{{ .Release.Name }}-pricing-service:8080"
     THIRD_PARTY_SERVICE_URL: "http://{{ .Release.Name }}-third-party-service:8080"
+    BITCOIN_SERVICE_URL: "http://{{ .Release.Name }}-bitcoin-service:8080"
+    BITCOIN_SERVICE_URL_HOST: "{{ .Release.Name }}-bitcoin-service:8080"
   resources:
     requests:
-      cpu: 50m
-      memory: 100Mi
+      cpu: 100m
+      memory: 128Mi
     limits:
-      cpu: 200m
-      memory: 100Mi
+      cpu: "1"
+      memory: 256Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 30
+    targetCPUUtilizationPercentage: 60
   service:
     enabled: true
     ports:
@@ -247,11 +275,16 @@ loginservice:
       key: "DOTNET_CONNECTION_STRING"
   resources:
     requests:
-      cpu: 20m
+      cpu: 100m
       memory: 450Mi
     limits:
-      cpu: 1
-      memory: 450Mi
+      cpu: "1"
+      memory: 512Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 30
+    targetCPUUtilizationPercentage: 65
   service:
     enabled: true
     port: 8080
@@ -266,11 +299,16 @@ manager:
       key: "DOTNET_CONNECTION_STRING"
   resources:
     requests:
-      cpu: 50m
+      cpu: 100m
       memory: 600Mi
     limits:
-      cpu: 500m
-      memory: 600Mi
+      cpu: "1"
+      memory: 768Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 20
+    targetCPUUtilizationPercentage: 70
   service:
     enabled: true
     port: 8080
@@ -290,8 +328,13 @@ offerservice:
       cpu: 50m
       memory: 150Mi
     limits:
-      cpu: 200m
-      memory: 150Mi
+      cpu: 500m
+      memory: 256Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 20
+    targetCPUUtilizationPercentage: 70
   service:
     enabled: true
     port: 8080
@@ -313,11 +356,16 @@ pricing-service:
       key: "GO_CONNECTION_STRING"
   resources:
     requests:
-      cpu: 20m
-      memory: 80Mi
+      cpu: 100m
+      memory: 128Mi
     limits:
-      cpu: 200m
-      memory: 80Mi
+      cpu: "1"
+      memory: 512Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 30
+    targetCPUUtilizationPercentage: 65
   service:
     enabled: true
     port: 8080
@@ -358,11 +406,11 @@ rabbitmq:
     RABBITMQ_QUEUE: Trade_Data_Raw
   resources:
     requests:
-      cpu: 10m
-      memory: 175Mi
-    limits:
       cpu: 200m
-      memory: 175Mi
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
   service:
     enabled: true
     ports:
@@ -394,6 +442,37 @@ third-party-service:
     limits:
       cpu: 200m
       memory: 450Mi
+  service:
+    enabled: true
+    port: 8080
+
+bitcoin-service:
+  enabled: true
+  env:
+    PROXY_PREFIX: "bitcoin-service"
+    CONFIRMATION_DELAY: "120"
+    CONFIRMATION_RATE: "300"
+    DETECTION_DELAY: "60"
+    DETECTION_RATE: "180"
+    DB_POOL_MAX_SIZE: "20"
+    DB_POOL_MIN_IDLE: "5"
+    DB_CONNECTION_TIMEOUT_MS: "10000"
+  envFromSecret:
+    MSSQL_CONNECTIONSTRING:
+      name: "{{ .Release.Name }}-connection-strings"
+      key: "JAVA_CONNECTION_STRING"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 650Mi
+    limits:
+      cpu: "2"
+      memory: 1Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 50
+    targetCPUUtilizationPercentage: 60
   service:
     enabled: true
     port: 8080
