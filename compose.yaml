@@ -126,6 +126,8 @@ services:
       - 80:80
     environment:
       BITCOIN_SERVICE_URL: http://bitcoin-service:8080
+      BITCOIN_SERVICE_URL_HOST: bitcoin-service:8080
+      BROKER_SERVICE_URL_HOST: broker-service:8080
 
   loadgen:
     <<: *default-service
@@ -211,6 +213,9 @@ services:
       CONFIRMATION_RATE: "300"
       DETECTION_DELAY: "60"
       DETECTION_RATE: "180"
+      DB_POOL_MAX_SIZE: "20"
+      DB_POOL_MIN_IDLE: "5"
+      DB_CONNECTION_TIMEOUT_MS: "10000"
 
   aggregator-service:
     <<: *default-service

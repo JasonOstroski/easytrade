@@ -1,6 +1,6 @@
 FROM nginx:1.29.0-alpine3.22-slim@sha256:64daa9307345a975d3952f4252827ed4be7f03ea675ad7bb5821f75ad3d43095
 
-RUN rm /etc/nginx/conf.d/default.conf
+RUN rm /etc/nginx/conf.d/default.conf && rm /etc/nginx/nginx.conf
 
 COPY nginx.conf /etc/nginx/templates/nginx.conf.template
 
@@ -9,6 +9,7 @@ EXPOSE 80
 # Set default values for environment variables
 ENV LOGIN_SERVICE_URL=http://loginservice:8080 \
     BROKER_SERVICE_URL=http://broker-service:8080 \
+    BROKER_SERVICE_URL_HOST=broker-service:8080 \
     ACCOUNT_SERVICE_URL=http://accountservice:8080 \
     PRICING_SERVICE_URL=http://pricing-service:8080 \
     OFFER_SERVICE_URL=http://offerservice:8080 \
@@ -18,7 +19,9 @@ ENV LOGIN_SERVICE_URL=http://loginservice:8080 \
     THIRD_PARTY_SERVICE_URL=http://third-party-service:8080 \
     FEATURE_FLAG_SERVICE_URL=http://feature-flag-service:8080 \
     BITCOIN_SERVICE_URL=http://bitcoin-service:8080 \
+    BITCOIN_SERVICE_URL_HOST=bitcoin-service:8080 \
     FRONTEND_URL=http://frontend:3000/ \
     FRONTEND_REVERSE_PROXY_PORT=80
 
-CMD ["nginx", "-g", "daemon off;"]
+# Use envsubst to template the full nginx config then start nginx
+CMD ["/bin/sh", "-c", "envsubst '${LOGIN_SERVICE_URL} ${BROKER_SERVICE_URL} ${BROKER_SERVICE_URL_HOST} ${ACCOUNT_SERVICE_URL} ${PRICING_SERVICE_URL} ${OFFER_SERVICE_URL} ${ENGINE_URL} ${MANAGER_URL} ${CREDIT_CARD_ORDER_SERVICE_URL} ${THIRD_PARTY_SERVICE_URL} ${FEATURE_FLAG_SERVICE_URL} ${BITCOIN_SERVICE_URL} ${BITCOIN_SERVICE_URL_HOST} ${FRONTEND_URL} ${FRONTEND_REVERSE_PROXY_PORT}' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"]

@@ -1,6 +1,9 @@
 package com.dynatrace.easytrade.bitcoinservice;
 
 import com.dynatrace.easytrade.bitcoinservice.models.*;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 import java.sql.*;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -25,6 +28,28 @@ public class DatabaseHelper {
     private final String GET_ORDER_BY_ID_QUERY = "SELECT * FROM BitcoinOrders WHERE Id = ?";
 
     private static final Logger logger = LoggerFactory.getLogger(DatabaseHelper.class);
+    private final HikariDataSource dataSource;
+
+    public DatabaseHelper() {
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(System.getenv("MSSQL_CONNECTIONSTRING"));
+        // Pool sizing: sized for 100x traffic per replica
+        // Formula: connections = (core_count * 2) + effective_spindle_count
+        // For a service pod with 1 CPU core: (1*2)+1 = 3 minimum, but we allow headroom
+        config.setMaximumPoolSize(Integer.parseInt(System.getenv().getOrDefault("DB_POOL_MAX_SIZE", "20")));
+        config.setMinimumIdle(Integer.parseInt(System.getenv().getOrDefault("DB_POOL_MIN_IDLE", "5")));
+        config.setConnectionTimeout(Integer.parseInt(System.getenv().getOrDefault("DB_CONNECTION_TIMEOUT_MS", "10000")));
+        config.setIdleTimeout(300000); // 5 minutes
+        config.setMaxLifetime(600000); // 10 minutes
+        config.setPoolName("bitcoin-service-pool");
+        // Leak detection: flag connections held longer than 30s
+        config.setLeakDetectionThreshold(30000);
+        // Keep connections validated
+        config.setKeepaliveTime(60000);
+        this.dataSource = new HikariDataSource(config);
+        logger.info("HikariCP pool initialized: max={}, minIdle={}, timeout={}ms",
+                config.getMaximumPoolSize(), config.getMinimumIdle(), config.getConnectionTimeout());
+    }
 
     public String insertNewOrder(Connection conn, BitcoinOrderRequest request, String depositAddress) throws SQLException {
         PreparedStatement query = conn.prepareStatement(INSERT_ORDER_QUERY);
@@ -166,6 +191,6 @@ public class DatabaseHelper {
     }
 
     public Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(System.getenv("MSSQL_CONNECTIONSTRING"));
+        return dataSource.getConnection();
     }
 }
