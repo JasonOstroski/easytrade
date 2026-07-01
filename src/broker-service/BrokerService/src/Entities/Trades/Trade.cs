@@ -1,4 +1,5 @@
-﻿using EasyTrade.BrokerService.Helpers;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using EasyTrade.BrokerService.Helpers;
 
 namespace EasyTrade.BrokerService.Entities.Trades;
 
@@ -15,6 +16,7 @@ public class Trade(
     string status
 )
 {
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     public int AccountId { get; set; } = accountId;
     public int InstrumentId { get; set; } = instrumentId;

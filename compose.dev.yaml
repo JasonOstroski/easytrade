@@ -76,6 +76,7 @@ services:
       <<: *feature-flag-service-env
       PROXY_PREFIX: broker-service
       MSSQL_CONNECTIONSTRING: *dotnet-connection-string
+      PROBLEM_PATTERNS_ENABLED: "true"
 
   rabbitmq:
     <<: *default-service

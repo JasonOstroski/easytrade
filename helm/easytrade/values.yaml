@@ -55,6 +55,7 @@ broker-service:
     FEATURE_FLAG_SERVICE_BASE_URL: "{{ .Release.Name }}-feature-flag-service"
     FEATURE_FLAG_SERVICE_PORT: "8080"
     PROXY_PREFIX: "broker-service"
+    PROBLEM_PATTERNS_ENABLED: "false"
   envFromSecret:
     MSSQL_CONNECTIONSTRING:
       name: "{{ .Release.Name }}-connection-strings"
