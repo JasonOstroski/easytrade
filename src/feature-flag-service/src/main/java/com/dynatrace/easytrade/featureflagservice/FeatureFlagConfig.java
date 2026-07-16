@@ -23,10 +23,18 @@ public class FeatureFlagConfig {
         private String enableCreditCardMeltdown;
         @Value("${app.flags.enableHighCpuUsage}")
         private String enableHighCpuUsage;
+        @Value("${app.flags.enableBitcoinPayments}")
+        private String enableBitcoinPayments;
 
         @Bean
         public Map<String, Flag> flagRegistry() {
                 boolean isModifiable = Boolean.parseBoolean(enableModify);
+                var featureFlags = Map.of("bitcoin_payments",
+                                new Flag("bitcoin_payments",
+                                                Boolean.parseBoolean(enableBitcoinPayments),
+                                                "Bitcoin payments",
+                                                "When enabled, users can deposit funds using Bitcoin in addition to credit cards.",
+                                                true, "feature"));
                 var configFlags = Map.of("frontend_feature_flag_management",
                                 new Flag("frontend_feature_flag_management",
                                                 Boolean.parseBoolean(enableFrontendModify),
@@ -61,7 +69,7 @@ public class FeatureFlagConfig {
                                                 "Causes a slowdown of broker-service response time and increases CPU usage during that time. If the app is deployed on K8s, a CPU resource limit is also applied.",
                                                 isModifiable, "problem_pattern"));
                 return Stream
-                                .of(configFlags, problemPatterns)
+                                .of(featureFlags, configFlags, problemPatterns)
                                 .flatMap(m -> m.entrySet().stream())
                                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }

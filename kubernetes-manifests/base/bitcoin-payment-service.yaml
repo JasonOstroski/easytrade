@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bitcoin-payment-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: bitcoin-payment-service
+  template:
+    metadata:
+      labels:
+        app: bitcoin-payment-service
+    spec:
+      containers:
+        - name: bitcoin-payment-service
+          image: bitcoin-payment-service
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PROXY_PREFIX
+              value: "bitcoin-payment-service"
+            - name: BROKER_SERVICE_HOST
+              value: "broker-service"
+            - name: BROKER_SERVICE_PORT
+              value: "8080"
+            - name: CONFIRMATION_DELAY_SECONDS
+              value: "10"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bitcoin-payment-service
+spec:
+  type: ClusterIP
+  selector:
+    app: bitcoin-payment-service
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080

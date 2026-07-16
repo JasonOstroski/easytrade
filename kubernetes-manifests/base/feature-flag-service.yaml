@@ -19,6 +19,8 @@ spec:
           env:
             - name: ENABLE_CREDIT_CARD_MELTDOWN
               value: "false"
+            - name: ENABLE_BITCOIN_PAYMENTS
+              value: "false"
           resources:
             requests:
               cpu: 30m

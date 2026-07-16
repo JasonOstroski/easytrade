@@ -7,6 +7,7 @@ import { TransactionBackend } from "./transactions"
 import { UserBackend } from "./users"
 import { ConfigBackend } from "./configFeatureFlags"
 import { VersionBackend } from "./version"
+import { BitcoinBackend } from "./bitcoin"
 
 export const backends = {
     problemPatterns: new ProblemPatternBackend(
@@ -25,5 +26,6 @@ export const backends = {
         EnvProxy.getBrokerServiceUrl(),
         EnvProxy.getCreditCardServiceUrl()
     ),
+    bitcoin: new BitcoinBackend(EnvProxy.getBitcoinPaymentServiceUrl()),
     versions: new VersionBackend(),
 }

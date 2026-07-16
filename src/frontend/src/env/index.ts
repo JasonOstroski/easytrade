@@ -26,4 +26,8 @@ export class EnvProxy {
     static getCreditCardServiceUrl(): string {
         return `${window.location.origin}/credit-card-order-service/v1`
     }
+
+    static getBitcoinPaymentServiceUrl(): string {
+        return `${window.location.origin}/bitcoin-payment-service/v1`
+    }
 }

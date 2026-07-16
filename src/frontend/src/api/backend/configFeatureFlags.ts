@@ -31,4 +31,8 @@ export class ConfigBackend {
             },
         })
     }
+
+    getById(flagId: string) {
+        return this.agent.get<FeatureFlag>(`/flags/${flagId}`)
+    }
 }

@@ -107,6 +107,17 @@ services:
       MSSQL_CONNECTIONSTRING: *dotnet-connection-string
       PROXY_PREFIX: loginservice
 
+  bitcoin-payment-service:
+    <<: *default-service
+    image: ${REGISTRY}/bitcoin-payment-service:${TAG}
+    depends_on:
+      - broker-service
+    environment:
+      PROXY_PREFIX: bitcoin-payment-service
+      BROKER_SERVICE_HOST: broker-service
+      BROKER_SERVICE_PORT: "8080"
+      CONFIRMATION_DELAY_SECONDS: "10"
+
   frontendreverseproxy:
     <<: *default-service
     image: ${REGISTRY}/frontendreverseproxy:${TAG}
@@ -121,6 +132,7 @@ services:
       - engine
       - credit-card-order-service
       - third-party-service
+      - bitcoin-payment-service
     ports:
       - 80:80
 
