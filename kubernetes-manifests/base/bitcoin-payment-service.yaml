@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: bitcoin-payment-service
 spec:
-  replicas: 2
+  replicas: 4
   selector:
     matchLabels:
       app: bitcoin-payment-service
@@ -28,9 +28,10 @@ spec:
               value: "10"
           resources:
             requests:
-              cpu: 50m
-              memory: 128Mi
+              cpu: 100m
+              memory: 256Mi
             limits:
+              cpu: 500m
               memory: 256Mi
 ---
 apiVersion: v1

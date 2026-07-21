@@ -13,6 +13,7 @@ kind: Deployment
 metadata:
   name: offerservice
 spec:
+  replicas: 2
   selector:
     matchLabels:
       app: offerservice
@@ -34,10 +35,11 @@ spec:
                 name: feature-flag-service-setup
           resources:
             requests:
-              cpu: 50m
-              memory: 100Mi
+              cpu: 200m
+              memory: 256Mi
             limits:
-              memory: 100Mi
+              cpu: "1"
+              memory: 256Mi
 ---
 apiVersion: v1
 kind: Service

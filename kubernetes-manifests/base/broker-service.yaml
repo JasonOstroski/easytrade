@@ -13,6 +13,7 @@ kind: Deployment
 metadata:
   name: broker-service
 spec:
+  replicas: 4
   selector:
     matchLabels:
       app: broker-service
@@ -39,10 +40,11 @@ spec:
                 name: feature-flag-service-setup
           resources:
             requests:
-              cpu: 150m
-              memory: 350Mi
+              cpu: 500m
+              memory: 512Mi
             limits:
-              memory: 350Mi
+              cpu: "2"
+              memory: 512Mi
 ---
 apiVersion: v1
 kind: Service

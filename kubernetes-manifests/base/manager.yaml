@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   name: manager
 spec:
+  replicas: 3
   selector:
     matchLabels:
       app: manager
@@ -26,9 +27,10 @@ spec:
                   key: DOTNET_CONNECTION_STRING
           resources:
             requests:
-              cpu: 50m
+              cpu: 300m
               memory: 400Mi
             limits:
+              cpu: "1"
               memory: 400Mi
 ---
 apiVersion: v1
